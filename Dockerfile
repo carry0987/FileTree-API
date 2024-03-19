@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o filetree .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o filetree cmd/server/main.go
 
 # Use a minimal alpine image
 FROM alpine:latest
