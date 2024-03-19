@@ -12,6 +12,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var version = "1.0.0"
+
 func main() {
 	// Load the environment variables
 	utils.LoadEnv()
@@ -45,6 +47,9 @@ func main() {
 
 	// Start the server
 	utils.OutputMessage(nil, utils.LogOutput, 0, "Listening on http://localhost%s\n", server.Addr)
+	// Show the version
+	utils.OutputMessage(nil, utils.LogOutput, 0, "Version: %s\n", version)
+	// If the server fails to start, log the error
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		utils.OutputMessage(nil, utils.FatalOutput, 0, "ListenAndServe error: %v", err)
 	}
