@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var version = "1.0.0"
+var version = "1.0.1"
 
 func main() {
 	// Load the environment variables
@@ -39,9 +39,15 @@ func main() {
 	// Add the signature verification middleware to our file tree handler function
 	r.Handle("/{signature}/enc/{encrypted}", security.SignatureVerificationMiddleware(http.HandlerFunc(handler.FileTreeHandler)))
 
+	// If FILETREE_PORT is set, use that as the port, otherwise use 8080
+	port := os.Getenv("FILETREE_PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	// Configure the server
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: r,
 	}
 
