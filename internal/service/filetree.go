@@ -1,6 +1,7 @@
 package service
 
 import (
+	"FileTree-API/internal/utils"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -46,6 +47,8 @@ func GenerateFileTree(root string) (*FileNode, error) {
 
 	// Use a buffered channel to control the number of goroutines
 	sema := make(chan struct{}, runtime.NumCPU()) // Use the number of CPUs for better concurrency control
+	errCh := make(chan error, 1) // Error channel
+	errWg := sync.WaitGroup{} // WaitGroup for error channel
 
 	// A recursive function to fill the file tree nodes
 	var walkDir func(string, *FileNode)
@@ -55,6 +58,7 @@ func GenerateFileTree(root string) (*FileNode, error) {
 		// List entries under the directory
 		entries, err := os.ReadDir(path)
 		if err != nil {
+			errCh <- err // Send the error to the error channel
 			return // Ignore directories that cannot be read
 		}
 
@@ -75,10 +79,8 @@ func GenerateFileTree(root string) (*FileNode, error) {
 			if entry.IsDir() {
 				// Use WaitGroup to add a count before recursion
 				wg.Add(1)
-
 				// Block until there is space to put a new goroutine
 				sema <- struct{}{}
-
 				// Recursively traverse the directory in parallel
 				go func() {
 					walkDir(fullPath, childNode)
@@ -92,10 +94,24 @@ func GenerateFileTree(root string) (*FileNode, error) {
 
 	// Set the root node
 	wg.Add(1)
-	walkDir(root, rootNode)
-
+	go walkDir(root, rootNode)
 	// Wait for all goroutines to finish
 	wg.Wait()
+	// Close the error channel
+	close(errCh)
+
+	// Error handling routine
+	errWg.Add(1)
+	go func() {
+		defer errWg.Done()
+		for err := range errCh {
+			// Handle errors here, possibly logging them or aggregating into a single error
+			if err != nil {
+				utils.OutputMessage(nil, utils.LogOutput, 0, "Error: %v", err)
+			}
+		}
+	}()
+	errWg.Wait() // Wait for the error handling routine to finish
 
 	return rootNode, nil
 }
