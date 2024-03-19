@@ -12,22 +12,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var version = "1.0.1"
+var version = "1.0.2"
 
 func main() {
 	// Load the environment variables
 	utils.LoadEnv()
 	// Check if the required environment variables exist
-	utils.CheckEnvVariables([]string{"FILELIST_SECRET_KEY", "FILELIST_SECRET_SALT"})
+	utils.CheckEnvVariables([]string{"FILETREE_SECRET_KEY", "FILETREE_SECRET_SALT"})
 
 	// Decode the key and salt
-	key, err := hex.DecodeString(os.Getenv("FILELIST_SECRET_KEY"))
+	key, err := hex.DecodeString(os.Getenv("FILETREE_SECRET_KEY"))
 	if err != nil {
-		utils.OutputMessage(nil, utils.FatalOutput, 0, "Failed to decode FILELIST_SECRET_KEY")
+		utils.OutputMessage(nil, utils.FatalOutput, 0, "Failed to decode FILETREE_SECRET_KEY")
 	}
-	salt, err := hex.DecodeString(os.Getenv("FILELIST_SECRET_SALT"))
+	salt, err := hex.DecodeString(os.Getenv("FILETREE_SECRET_SALT"))
 	if err != nil {
-		utils.OutputMessage(nil, utils.FatalOutput, 0, "Failed to decode FILELIST_SECRET_SALT")
+		utils.OutputMessage(nil, utils.FatalOutput, 0, "Failed to decode FILETREE_SECRET_SALT")
 	}
 
 	// Pass the key and salt to the security package
