@@ -3,6 +3,7 @@ package service
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 )
 
@@ -44,7 +45,7 @@ func GenerateFileTree(root string) (*FileNode, error) {
 	var wg sync.WaitGroup
 
 	// Use a buffered channel to control the number of goroutines
-	sema := make(chan struct{}, 128) // or runtime.NumCPU() depending on the number of cores of your CPU
+	sema := make(chan struct{}, runtime.NumCPU()) // Use the number of CPUs for better concurrency control
 
 	// A recursive function to fill the file tree nodes
 	var walkDir func(string, *FileNode)
