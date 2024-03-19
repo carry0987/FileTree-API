@@ -1,0 +1,35 @@
+# Ignore all local configuration files
+*.env
+
+# Ignore version control system directory
+.git
+.gitignore
+
+# Ignore all md files
+*.md
+
+# Ignore all Go build artifacts
+*.o
+*.a
+*.so
+*.exe
+*_test.go
+
+# Go build ignore
+vendor
+Gopkg.lock
+go.sum
+go.mod
+
+# Ignore editor temporary files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Ignore all temp files
+/my-go-project/bin/
+/my-go-project/tmp/
+/my-go-project/.cache
+/my-go-project/tests
