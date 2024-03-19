@@ -27,7 +27,7 @@ go build -o filetree-api ./cmd/server
 
 3. Set the environment variables
 ```bash
-export FILETREE_API_PORT=8080
+export FILETREE_PORT=8080
 export FILETREE_SECRET_KEY=your-secret-key
 export FILETREE_SECRET_SALT=your-secret-salt
 ```
