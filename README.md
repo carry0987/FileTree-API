@@ -45,6 +45,13 @@ The encrypted folder path is generated using the `FILETREE_SECRET_KEY` and `FILE
 http://your-domain.com:your-port/<signature>/enc/<encrypted_folder_path>
 ```
 
+## Projects Using FileTree-API
+Several projects are built on top of or with FileTree-API to extend its capabilities and offer more features. Here's a list of such projects:
+
+- [PHP-FileTree](https://github.com/carry0987/PHP-FileTree): A PHP script for generating signed and encrypted URLs with FileTree-API, using AES-256-GCM and HMAC-SHA256.
+
+We encourage the community to build more projects leveraging FileTree-API's powerful image processing capabilities. If you have a project that uses FileTree-API, feel free to open a pull request to add it to this list!
+
 ## Contributing
 We welcome all forms of contributions, whether it be submitting issues, writing documentation, or sending pull requests.
 
