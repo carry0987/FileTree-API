@@ -9,10 +9,14 @@ import (
 )
 
 type FileNode struct {
-	Name     string      `json:"name"`
-	Path     string      `json:"path"`
-	IsDir    bool        `json:"isDir"`
-	Children []*FileNode `json:"children,omitempty"`
+	Name         string      `json:"name"`
+	Size         int64       `json:"size,omitempty"`
+	FileType     string      `json:"fileType,omitempty"`
+	CreatedDate  int64       `json:"createdDate,omitempty"`
+	LastModified int64       `json:"lastModified,omitempty"`
+	Path         string      `json:"path"`
+	IsDir        bool        `json:"isDir"`
+	Children     []*FileNode `json:"children,omitempty"`
 }
 
 // GenerateFileTree recursively generates a file tree for the given directory
@@ -47,8 +51,8 @@ func GenerateFileTree(root string) (*FileNode, error) {
 
 	// Use a buffered channel to control the number of goroutines
 	sema := make(chan struct{}, runtime.NumCPU()) // Use the number of CPUs for better concurrency control
-	errCh := make(chan error, 1) // Error channel
-	errWg := sync.WaitGroup{} // WaitGroup for error channel
+	errCh := make(chan error, 1)                  // Error channel
+	errWg := sync.WaitGroup{}                     // WaitGroup for error channel
 
 	// A recursive function to fill the file tree nodes
 	var walkDir func(string, *FileNode)
@@ -59,7 +63,7 @@ func GenerateFileTree(root string) (*FileNode, error) {
 		entries, err := os.ReadDir(path)
 		if err != nil {
 			errCh <- err // Send the error to the error channel
-			return // Ignore directories that cannot be read
+			return       // Ignore directories that cannot be read
 		}
 
 		for _, entry := range entries {
@@ -75,6 +79,21 @@ func GenerateFileTree(root string) (*FileNode, error) {
 				Path:  fullPath,
 				IsDir: entry.IsDir(),
 			}
+
+			// Check if entry is not a directory
+			if !entry.IsDir() {
+				fileInfo, err := entry.Info()
+				if err != nil {
+					errCh <- err // Send error to the error channel
+					continue
+				}
+				// Fill additional fields for files
+				childNode.Size = fileInfo.Size()
+				childNode.FileType = filepath.Ext(entry.Name())
+				childNode.CreatedDate = fileInfo.ModTime().Unix()
+				childNode.LastModified = fileInfo.ModTime().Unix()
+			}
+
 			// If it is a directory, recursively traverse the directory
 			if entry.IsDir() {
 				// Use WaitGroup to add a count before recursion
@@ -87,6 +106,7 @@ func GenerateFileTree(root string) (*FileNode, error) {
 					<-sema
 				}()
 			}
+
 			// If it is a file, add it to the children list
 			node.Children = append(node.Children, childNode)
 		}
