@@ -12,9 +12,9 @@ type FileNode struct {
 	Name         string      `json:"name"`
 	Size         int64       `json:"size,omitempty"`
 	FileType     string      `json:"fileType,omitempty"`
+	Path         string      `json:"path"`
 	CreatedDate  int64       `json:"createdDate,omitempty"`
 	LastModified int64       `json:"lastModified,omitempty"`
-	Path         string      `json:"path"`
 	IsDir        bool        `json:"isDir"`
 	Children     []*FileNode `json:"children,omitempty"`
 }
@@ -41,9 +41,10 @@ func GenerateFileTree(root string) (*FileNode, error) {
 
 	// Create the root node
 	rootNode := &FileNode{
-		Name:  filepath.Base(root),
-		Path:  root,
-		IsDir: true,
+		Name:         filepath.Base(root),
+		Path:         root,
+		LastModified: info.ModTime().Unix(),
+		IsDir:        true,
 	}
 
 	// Use a WaitGroup to wait for all goroutines to finish
@@ -73,25 +74,25 @@ func GenerateFileTree(root string) (*FileNode, error) {
 			}
 			// Get the full path of the entry
 			fullPath := filepath.Join(path, entry.Name())
-			// Node initialization
+			// Node initialization with common properties
+			fileInfo, err := entry.Info() // Get file info for common properties
+			if err != nil {
+				errCh <- err // Send error to the error channel
+				continue
+			}
 			childNode := &FileNode{
-				Name:  entry.Name(),
-				Path:  fullPath,
-				IsDir: entry.IsDir(),
+				Name:         entry.Name(),
+				Path:         fullPath,
+				LastModified: fileInfo.ModTime().Unix(), // Set last modified for both files and directories
+				IsDir:        entry.IsDir(),
 			}
 
 			// Check if entry is not a directory
 			if !entry.IsDir() {
-				fileInfo, err := entry.Info()
-				if err != nil {
-					errCh <- err // Send error to the error channel
-					continue
-				}
 				// Fill additional fields for files
 				childNode.Size = fileInfo.Size()
 				childNode.FileType = filepath.Ext(entry.Name())
 				childNode.CreatedDate = fileInfo.ModTime().Unix()
-				childNode.LastModified = fileInfo.ModTime().Unix()
 			}
 
 			// If it is a directory, recursively traverse the directory

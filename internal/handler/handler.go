@@ -11,6 +11,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func DefaultHandler(w http.ResponseWriter, r *http.Request) {
+	utils.OutputMessage(w, utils.HTTPResponse, http.StatusOK, "FileTree API")
+}
+
 // FileTreeHandler handles the file tree API request
 func FileTreeHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the signature and encrypted parameters from the route or query parameters

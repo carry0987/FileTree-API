@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var version = "1.0.3"
+var version = "1.0.4"
 
 func main() {
 	// Load the environment variables
@@ -35,6 +35,9 @@ func main() {
 
 	// Create a new Gorilla Mux HTTP router
 	r := mux.NewRouter()
+
+	// Default handler for the root path
+	r.Handle("/", http.HandlerFunc(handler.DefaultHandler))
 
 	// Add the signature verification middleware to our file tree handler function
 	r.Handle("/{signature}/enc/{encrypted}", security.SignatureVerificationMiddleware(http.HandlerFunc(handler.FileTreeHandler)))
