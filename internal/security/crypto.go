@@ -1,7 +1,6 @@
 package security
 
 import (
-	"FileTree-API/internal/utils"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
@@ -11,6 +10,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/carry0987/FileTree-API/internal/utils"
 
 	"github.com/gorilla/mux"
 )

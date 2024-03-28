@@ -1,12 +1,13 @@
 package service
 
 import (
-	"FileTree-API/internal/utils"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
+
+	"github.com/carry0987/FileTree-API/internal/utils"
 )
 
 type FileNode struct {

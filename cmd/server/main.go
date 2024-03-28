@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"os"
 
-	"FileTree-API/internal/handler"
-	"FileTree-API/internal/security"
-	"FileTree-API/internal/utils"
+	"github.com/carry0987/FileTree-API/internal/handler"
+	"github.com/carry0987/FileTree-API/internal/security"
+	"github.com/carry0987/FileTree-API/internal/utils"
 
 	"github.com/gorilla/mux"
 )
 
-var version = "1.0.6"
+var version = "1.0.7"
 
 func main() {
 	// Load the environment variables

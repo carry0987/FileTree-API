@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"FileTree-API/internal/security"
-	"FileTree-API/internal/service"
-	"FileTree-API/internal/utils"
-	"FileTree-API/pkg/api"
 	"encoding/json"
 	"net/http"
+
+	"github.com/carry0987/FileTree-API/internal/security"
+	"github.com/carry0987/FileTree-API/internal/service"
+	"github.com/carry0987/FileTree-API/internal/utils"
+	"github.com/carry0987/FileTree-API/pkg/api"
 
 	"github.com/gorilla/mux"
 )
