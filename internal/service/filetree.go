@@ -26,7 +26,7 @@ type OrganizedTree struct {
 }
 
 // GenerateFileTree recursively generates a file tree for the given directory
-func GenerateFileTree(root string, organize bool) ([]*FileNode, error) {
+func GenerateFileTree(root string, organize bool) (interface{}, error) {
 	// Make sure the path is normalized
 	root, err := filepath.Abs(root)
 	if err != nil {
@@ -90,7 +90,7 @@ func GenerateFileTree(root string, organize bool) ([]*FileNode, error) {
 		utils.OutputMessage(nil, utils.LogOutput, 0, "Get file tree for %v", rootNode.Path)
 	}
 
-	return []*FileNode{rootNode}, nil
+	return rootNode, nil
 }
 
 func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}, errCh chan error) {
@@ -148,24 +148,29 @@ func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}
 }
 
 // Organizes the file tree into a flat list
-func OrganizeFileTree(node *FileNode) []*FileNode {
-	var fileList []*FileNode
-	collectNodesForFlatList(node, &fileList)
+func OrganizeFileTree(node *FileNode) OrganizedTree {
+	organizedTree := OrganizedTree{Dirs: []*FileNode{}, Files: []*FileNode{}}
+	collectNodesForOrganizedTree(node, &organizedTree)
 
-	return fileList
+	return organizedTree
 }
 
-// Helper function to recursively collect all nodes into a flat list
-func collectNodesForFlatList(node *FileNode, fileList *[]*FileNode) {
+// Helper function to recursively collect nodes into organized dirs and files
+func collectNodesForOrganizedTree(node *FileNode, organizedTree *OrganizedTree) {
 	if node != nil {
-		// Simply append the current node
-		newNode := *node       // Create a copy to avoid modifying the original node
-		newNode.Children = nil // We don't want children in the flat list
-		*fileList = append(*fileList, &newNode)
+		if node.IsDir {
+			// For directories, append to Dirs and skip including children
+			newNode := *node       // Create a copy to avoid modifying the original node
+			newNode.Children = nil // We don't want children in the dirs
+			organizedTree.Dirs = append(organizedTree.Dirs, &newNode)
+		} else {
+			// For files, simply append to Files
+			organizedTree.Files = append(organizedTree.Files, node)
+		}
 
-		// If the node is a directory, iterate through its children
+		// Iterate through children if it's a directory
 		for _, child := range node.Children {
-			collectNodesForFlatList(child, fileList)
+			collectNodesForOrganizedTree(child, organizedTree)
 		}
 	}
 }
