@@ -39,7 +39,8 @@ func FileTreeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate the file tree using the decrypted path
-	fileTree, err := service.GenerateFileTree(decryptedPath)
+	realPath, organize := utils.CheckOrganize(decryptedPath)
+	fileTree, err := service.GenerateFileTree(realPath, organize)
 	if err != nil {
 		errorMsg := "Error generating file tree"
 		api.InternalServerError(errorMsg)

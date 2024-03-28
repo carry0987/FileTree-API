@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -19,8 +20,13 @@ type FileNode struct {
 	Children     []*FileNode `json:"children,omitempty"`
 }
 
+type OrganizedTree struct {
+	Dirs  []*FileNode `json:"dirs"`
+	Files []*FileNode `json:"files"`
+}
+
 // GenerateFileTree recursively generates a file tree for the given directory
-func GenerateFileTree(root string) (*FileNode, error) {
+func GenerateFileTree(root string, organize bool) ([]*FileNode, error) {
 	// Make sure the path is normalized
 	root, err := filepath.Abs(root)
 	if err != nil {
@@ -55,67 +61,9 @@ func GenerateFileTree(root string) (*FileNode, error) {
 	errCh := make(chan error, 1)                  // Error channel
 	errWg := sync.WaitGroup{}                     // WaitGroup for error channel
 
-	// A recursive function to fill the file tree nodes
-	var walkDir func(string, *FileNode)
-	walkDir = func(path string, node *FileNode) {
-		defer wg.Done()
-
-		// List entries under the directory
-		entries, err := os.ReadDir(path)
-		if err != nil {
-			errCh <- err // Send the error to the error channel
-			return       // Ignore directories that cannot be read
-		}
-
-		for _, entry := range entries {
-			// Skip hidden files and directories
-			if entry.Name()[0] == '.' {
-				continue
-			}
-			// Get the full path of the entry
-			fullPath := filepath.Join(path, entry.Name())
-			// Node initialization with common properties
-			fileInfo, err := entry.Info() // Get file info for common properties
-			if err != nil {
-				errCh <- err // Send error to the error channel
-				continue
-			}
-			childNode := &FileNode{
-				Name:         entry.Name(),
-				Path:         fullPath,
-				LastModified: fileInfo.ModTime().Unix(), // Set last modified for both files and directories
-				IsDir:        entry.IsDir(),
-			}
-
-			// Check if entry is not a directory
-			if !entry.IsDir() {
-				// Fill additional fields for files
-				childNode.Size = fileInfo.Size()
-				childNode.FileType = filepath.Ext(entry.Name())
-				childNode.CreatedDate = fileInfo.ModTime().Unix()
-			}
-
-			// If it is a directory, recursively traverse the directory
-			if entry.IsDir() {
-				// Use WaitGroup to add a count before recursion
-				wg.Add(1)
-				// Block until there is space to put a new goroutine
-				sema <- struct{}{}
-				// Recursively traverse the directory in parallel
-				go func() {
-					walkDir(fullPath, childNode)
-					<-sema
-				}()
-			}
-
-			// If it is a file, add it to the children list
-			node.Children = append(node.Children, childNode)
-		}
-	}
-
 	// Set the root node
 	wg.Add(1)
-	go walkDir(root, rootNode)
+	go walkDir(root, rootNode, &wg, sema, errCh)
 	// Wait for all goroutines to finish
 	wg.Wait()
 	// Close the error channel
@@ -134,5 +82,91 @@ func GenerateFileTree(root string) (*FileNode, error) {
 	}()
 	errWg.Wait() // Wait for the error handling routine to finish
 
-	return rootNode, nil
+	if organize {
+		flatList := OrganizeFileTree(rootNode)
+		utils.OutputMessage(nil, utils.LogOutput, 0, "Organizing file tree for %v", rootNode.Path)
+		return flatList, nil
+	} else {
+		utils.OutputMessage(nil, utils.LogOutput, 0, "Get file tree for %v", rootNode.Path)
+	}
+
+	return []*FileNode{rootNode}, nil
+}
+
+func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}, errCh chan error) {
+	defer wg.Done()
+
+	// List entries under the directory
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		errCh <- err // Send the error to the error channel
+		return       // Ignore directories that cannot be read
+	}
+
+	for _, entry := range entries {
+		// Skip hidden files and directories
+		if entry.Name()[0] == '.' {
+			continue
+		}
+		// Get the full path of the entry
+		fullPath := filepath.Join(path, entry.Name())
+		// Node initialization with common properties
+		fileInfo, err := entry.Info() // Get file info for common properties
+		if err != nil {
+			errCh <- err // Send error to the error channel
+			continue
+		}
+		childNode := &FileNode{
+			Name:         entry.Name(),
+			Path:         fullPath,
+			LastModified: fileInfo.ModTime().Unix(), // Set last modified for both files and directories
+			IsDir:        entry.IsDir(),
+		}
+
+		if !entry.IsDir() {
+			// Fill additional fields for files
+			childNode.Size = fileInfo.Size()
+			childNode.FileType = strings.TrimPrefix(filepath.Ext(entry.Name()), ".") // Remove dot from the extension
+			childNode.CreatedDate = fileInfo.ModTime().Unix()
+		}
+
+		// If it is a directory, recursively traverse the directory
+		if entry.IsDir() {
+			// Use WaitGroup to add a count before recursion
+			wg.Add(1)
+			// Block until there is space to put a new goroutine
+			sema <- struct{}{}
+			// Recursively traverse the directory in parallel
+			go func() {
+				walkDir(fullPath, childNode, wg, sema, errCh)
+				<-sema
+			}()
+		}
+
+		// If it is a file, add it to the children list
+		node.Children = append(node.Children, childNode)
+	}
+}
+
+// Organizes the file tree into a flat list
+func OrganizeFileTree(node *FileNode) []*FileNode {
+	var fileList []*FileNode
+	collectNodesForFlatList(node, &fileList)
+
+	return fileList
+}
+
+// Helper function to recursively collect all nodes into a flat list
+func collectNodesForFlatList(node *FileNode, fileList *[]*FileNode) {
+	if node != nil {
+		// Simply append the current node
+		newNode := *node       // Create a copy to avoid modifying the original node
+		newNode.Children = nil // We don't want children in the flat list
+		*fileList = append(*fileList, &newNode)
+
+		// If the node is a directory, iterate through its children
+		for _, child := range node.Children {
+			collectNodesForFlatList(child, fileList)
+		}
+	}
 }

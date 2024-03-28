@@ -73,3 +73,16 @@ func Base64UrlEncode(data string) string {
 func Base64UrlDecode(data string) ([]byte, error) {
 	return base64.RawURLEncoding.DecodeString(data)
 }
+
+// Get the parameters separate by '::'
+func CheckOrganize(data string) (string, bool) {
+	s := strings.Split(data, "::")
+	if len(s) != 2 {
+		return s[0], false
+	}
+	if s[1] == "org" {
+		return s[0], true
+	}
+
+	return s[0], false
+}
