@@ -40,7 +40,7 @@ jobs:
           VERSION=${{ needs.update-version.outputs.version }}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Updating version to $VERSION"
-          sed -i "s/var version = \"__VERSION__\"/var version = \"$VERSION\"/" cmd/server/main.go
+          sed -i "s/var version = \".*\"/var version = \"$VERSION\"/" cmd/server/main.go
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
