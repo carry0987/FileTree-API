@@ -96,6 +96,11 @@ func GenerateFileTree(root string, organize bool) ([]*FileNode, error) {
 func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}, errCh chan error) {
 	defer wg.Done()
 
+	// Acquire a semaphore at the start of walkDir to ensure it's released properly
+	sema <- struct{}{}
+	// Ensure to release semaphore whether the function exits normally or through a return
+	defer func() { <-sema }()
+
 	// List entries under the directory
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -134,13 +139,7 @@ func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}
 		if entry.IsDir() {
 			// Use WaitGroup to add a count before recursion
 			wg.Add(1)
-			// Block until there is space to put a new goroutine
-			sema <- struct{}{}
-			// Recursively traverse the directory in parallel
-			go func() {
-				walkDir(fullPath, childNode, wg, sema, errCh)
-				<-sema
-			}()
+			go walkDir(fullPath, childNode, wg, sema, errCh)
 		}
 
 		// If it is a file, add it to the children list
