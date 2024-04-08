@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/carry0987/FileTree-API/internal/utils"
@@ -29,15 +30,15 @@ type OrganizedTree struct {
 
 type FileTreeResult struct {
 	Tree      interface{}
-	DirCount  int
-	FileCount int
+	DirCount  int64
+	FileCount int64
 }
 
 // GenerateFileTree recursively generates a file tree for the given directory
 func GenerateFileTree(root string, organize bool) (*FileTreeResult, error) {
 	// Start counting time
 	start := time.Now()
-	var dirCount, fileCount int
+	var dirCount, fileCount int64
 
 	// Make sure the path is normalized
 	root, err := filepath.Abs(root)
@@ -75,7 +76,7 @@ func GenerateFileTree(root string, organize bool) (*FileTreeResult, error) {
 
 	// Set the root node
 	wg.Add(1)
-	go walkDir(root, rootNode, &wg, sema, errCh)
+	go walkDir(root, rootNode, &wg, sema, errCh, &dirCount, &fileCount)
 	// Wait for all goroutines to finish
 	wg.Wait()
 	// Close the error channel
@@ -116,7 +117,7 @@ func GenerateFileTree(root string, organize bool) (*FileTreeResult, error) {
 	return fileTreeResult, nil
 }
 
-func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}, errCh chan error) {
+func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}, errCh chan error, dirCount, fileCount *int64) {
 	defer wg.Done()
 
 	// Acquire a semaphore at the start of walkDir to ensure it's released properly
@@ -152,6 +153,7 @@ func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}
 		}
 
 		if !entry.IsDir() {
+			atomic.AddInt64(fileCount, 1)
 			// Fill additional fields for files
 			childNode.Size = fileInfo.Size()
 			childNode.FileType = strings.TrimPrefix(filepath.Ext(entry.Name()), ".") // Remove dot from the extension
@@ -160,9 +162,10 @@ func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}
 
 		// If it is a directory, recursively traverse the directory
 		if entry.IsDir() {
+			atomic.AddInt64(dirCount, 1)
 			// Use WaitGroup to add a count before recursion
 			wg.Add(1)
-			go walkDir(fullPath, childNode, wg, sema, errCh)
+			go walkDir(fullPath, childNode, wg, sema, errCh, dirCount, fileCount)
 		}
 
 		// If it is a file, add it to the children list
