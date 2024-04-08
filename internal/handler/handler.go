@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/carry0987/FileTree-API/internal/security"
 	"github.com/carry0987/FileTree-API/internal/service"
 	"github.com/carry0987/FileTree-API/internal/utils"
 	"github.com/carry0987/FileTree-API/pkg/api"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/gorilla/mux"
 )
@@ -18,6 +18,8 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 
 // FileTreeHandler handles the file tree API request
 func FileTreeHandler(w http.ResponseWriter, r *http.Request) {
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
+
 	// Get the signature and encrypted parameters from the route or query parameters
 	vars := mux.Vars(r)
 	encryptedPath := vars["encrypted"]
