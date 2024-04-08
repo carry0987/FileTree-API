@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/carry0987/FileTree-API/internal/utils"
 )
@@ -28,6 +29,9 @@ type OrganizedTree struct {
 
 // GenerateFileTree recursively generates a file tree for the given directory
 func GenerateFileTree(root string, organize bool) (interface{}, error) {
+	// Start counting time
+	start := time.Now()
+
 	// Make sure the path is normalized
 	root, err := filepath.Abs(root)
 	if err != nil {
@@ -90,6 +94,10 @@ func GenerateFileTree(root string, organize bool) (interface{}, error) {
 	} else {
 		utils.OutputMessage(nil, utils.LogOutput, 0, "Get file tree for %v", rootNode.Path)
 	}
+
+	// Output the time taken to generate the file tree
+	elapsed := time.Since(start)
+	utils.OutputMessage(nil, utils.LogOutput, 0, "Total time taken: %v", elapsed)
 
 	return rootNode, nil
 }
