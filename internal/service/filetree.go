@@ -27,10 +27,17 @@ type OrganizedTree struct {
 	Files []*FileNode `json:"files"`
 }
 
+type FileTreeResult struct {
+	Tree      interface{}
+	DirCount  int
+	FileCount int
+}
+
 // GenerateFileTree recursively generates a file tree for the given directory
-func GenerateFileTree(root string, organize bool) (interface{}, error) {
+func GenerateFileTree(root string, organize bool) (*FileTreeResult, error) {
 	// Start counting time
 	start := time.Now()
+	var dirCount, fileCount int
 
 	// Make sure the path is normalized
 	root, err := filepath.Abs(root)
@@ -87,11 +94,12 @@ func GenerateFileTree(root string, organize bool) (interface{}, error) {
 	}()
 	errWg.Wait() // Wait for the error handling routine to finish
 
+	var result interface{}
 	if organize {
-		flatList := OrganizeFileTree(rootNode)
+		result = OrganizeFileTree(rootNode)
 		utils.OutputMessage(nil, utils.LogOutput, 0, "Organizing file tree for %v", rootNode.Path)
-		return flatList, nil
 	} else {
+		result = rootNode
 		utils.OutputMessage(nil, utils.LogOutput, 0, "Get file tree for %v", rootNode.Path)
 	}
 
@@ -99,7 +107,13 @@ func GenerateFileTree(root string, organize bool) (interface{}, error) {
 	elapsed := time.Since(start)
 	utils.OutputMessage(nil, utils.LogOutput, 0, "Total time taken: %v", elapsed)
 
-	return rootNode, nil
+	fileTreeResult := &FileTreeResult{
+		Tree:      result,
+		DirCount:  dirCount,
+		FileCount: fileCount,
+	}
+
+	return fileTreeResult, nil
 }
 
 func walkDir(path string, node *FileNode, wg *sync.WaitGroup, sema chan struct{}, errCh chan error) {
