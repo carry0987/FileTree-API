@@ -37,14 +37,17 @@ func main() {
 	// Create a new Gorilla Mux HTTP router
 	r := mux.NewRouter()
 
+	// Add the gzip middleware to the router
+	r.Use(middleware.GzipMiddleware)
+
 	// Default handler for the root path
 	r.Handle("/", http.HandlerFunc(handler.DefaultHandler))
 
+	// Handler for WebSocket connections
+	r.Handle("/ws", http.HandlerFunc(handler.WebSocketHandler))
+
 	// Add the signature verification middleware to our file tree handler function
 	r.Handle("/{signature}/enc/{encrypted}", security.SignatureVerificationMiddleware(http.HandlerFunc(handler.FileTreeHandler)))
-
-	// Add the gzip middleware to the router
-	r.Use(middleware.GzipMiddleware)
 
 	// If FILETREE_PORT is set, use that as the port, otherwise use 8080
 	port := os.Getenv("FILETREE_PORT")
