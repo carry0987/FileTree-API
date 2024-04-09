@@ -20,10 +20,19 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+func UpgradeToWebSocket(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+    conn, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
+        return nil, err
+    }
+
+    return conn, nil
+}
+
 func WebSocketMessage(w http.ResponseWriter, r *http.Request, message string) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := UpgradeToWebSocket(w, r)
 	if err != nil {
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
 		return
 	}
 	defer conn.Close()
@@ -31,9 +40,8 @@ func WebSocketMessage(w http.ResponseWriter, r *http.Request, message string) {
 }
 
 func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := UpgradeToWebSocket(w, r)
 	if err != nil {
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
 		return
 	}
 	defer conn.Close()
