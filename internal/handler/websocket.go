@@ -23,7 +23,7 @@ var upgrader = websocket.Upgrader{
 func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		utils.OutputMessage(w, utils.HTTPResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
+		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
 		return
 	}
 	defer conn.Close()
@@ -34,32 +34,32 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	if encryptedPath == "" {
 		errorMsg := "Missing encrypted parameter"
 		api.UnauthorizedError(errorMsg)
-		utils.OutputMessage(w, utils.HTTPResponse, http.StatusBadRequest, errorMsg)
+		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusBadRequest, errorMsg)
 		return
 	}
 
 	decryptedPath, err := security.Decrypt(encryptedPath)
 	if err != nil {
-		utils.OutputMessage(w, utils.HTTPResponse, http.StatusInternalServerError, "Failed to decrypt the path")
+		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to decrypt the path")
 		return
 	}
 
 	realPath, organize := utils.CheckOrganize(decryptedPath)
 	fileTreeResult, err := service.GenerateFileTree(realPath, organize)
 	if err != nil {
-		utils.OutputMessage(w, utils.HTTPResponse, http.StatusInternalServerError, "Error generating file tree")
+		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Error generating file tree")
 		return
 	}
 
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	result, err := json.Marshal(fileTreeResult)
 	if err != nil {
-		utils.OutputMessage(w, utils.HTTPResponse, http.StatusInternalServerError, "Error encoding file tree result to JSON")
+		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Error encoding file tree result to JSON")
 		return
 	}
 
 	if err = conn.WriteMessage(websocket.TextMessage, result); err != nil {
-		utils.OutputMessage(w, utils.HTTPResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket")
+		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket")
 		return
 	}
 }

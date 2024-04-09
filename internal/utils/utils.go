@@ -16,6 +16,8 @@ type MessageOutputMode int
 const (
 	// HTTPResponse means the message will be output as HTTP response
 	HTTPResponse MessageOutputMode = iota
+	// WebSocketResponse means the message will be output as WebSocket response
+	WebSocketResponse
 	// LogOutput means the message will be logged
 	LogOutput
 	// FatalOutput means the message will be logged and the program will be terminated
@@ -55,6 +57,12 @@ func OutputMessage(w http.ResponseWriter, mode MessageOutputMode, statusCode int
 			return
 		}
 		http.Error(w, message, statusCode)
+	case WebSocketResponse:
+		if w == nil {
+			log.Printf("http.ResponseWriter is nil\n")
+			return
+		}
+		w.Write([]byte(message))
 	case LogOutput:
 		log.Print(message)
 	case FatalOutput:
