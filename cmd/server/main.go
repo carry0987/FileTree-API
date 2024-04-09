@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/carry0987/FileTree-API/internal/handler"
+	"github.com/carry0987/FileTree-API/internal/middleware"
 	"github.com/carry0987/FileTree-API/internal/security"
 	"github.com/carry0987/FileTree-API/internal/utils"
 
@@ -41,6 +42,9 @@ func main() {
 
 	// Add the signature verification middleware to our file tree handler function
 	r.Handle("/{signature}/enc/{encrypted}", security.SignatureVerificationMiddleware(http.HandlerFunc(handler.FileTreeHandler)))
+
+	// Add the gzip middleware to the router
+	r.Use(middleware.GzipMiddleware)
 
 	// If FILETREE_PORT is set, use that as the port, otherwise use 8080
 	port := os.Getenv("FILETREE_PORT")
