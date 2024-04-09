@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var version = "1.1.5"
+var version = "1.1.6"
 
 func main() {
 	// Load the environment variables
