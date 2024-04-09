@@ -34,32 +34,32 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	if encryptedPath == "" {
 		errorMsg := "Missing encrypted parameter"
 		api.UnauthorizedError(errorMsg)
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusBadRequest, errorMsg)
+		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusBadRequest, errorMsg)
 		return
 	}
 
 	decryptedPath, err := security.Decrypt(encryptedPath)
 	if err != nil {
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to decrypt the path")
+		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to decrypt the path")
 		return
 	}
 
 	realPath, organize := utils.CheckOrganize(decryptedPath)
 	fileTreeResult, err := service.GenerateFileTree(realPath, organize)
 	if err != nil {
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Error generating file tree")
+		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Error generating file tree")
 		return
 	}
 
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	result, err := json.Marshal(fileTreeResult)
 	if err != nil {
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Error encoding file tree result to JSON")
+		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Error encoding file tree result to JSON")
 		return
 	}
 
 	if err = conn.WriteMessage(websocket.TextMessage, result); err != nil {
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket")
+		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket")
 		return
 	}
 }

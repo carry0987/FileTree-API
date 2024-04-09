@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 )
 
@@ -47,22 +48,24 @@ func CheckEnvVariables(variables []string) {
 }
 
 // OutputMessage provides message output, output to HTTP or log according to mode
-func OutputMessage(w http.ResponseWriter, mode MessageOutputMode, statusCode int, format string, a ...interface{}) {
+func OutputMessage(w interface{}, mode MessageOutputMode, statusCode int, format string, a ...interface{}) {
 	message := fmt.Sprintf(format, a...)
 
 	switch mode {
 	case HTTPResponse:
-		if w == nil {
-			log.Printf("http.ResponseWriter is nil\n")
+		writer, ok := w.(http.ResponseWriter)
+		if !ok || writer == nil {
+			log.Printf("Parameter is not a valid http.ResponseWriter or is nil\n")
 			return
 		}
-		http.Error(w, message, statusCode)
+		http.Error(writer, message, statusCode)
 	case WebSocketResponse:
-		if w == nil {
-			log.Printf("http.ResponseWriter is nil\n")
+		conn, ok := w.(*websocket.Conn)
+		if !ok || conn == nil {
+			log.Printf("Parameter is not a valid *websocket.Conn or is nil\n")
 			return
 		}
-		w.Write([]byte(message))
+		conn.WriteMessage(websocket.TextMessage, []byte(message))
 	case LogOutput:
 		log.Print(message)
 	case FatalOutput:
