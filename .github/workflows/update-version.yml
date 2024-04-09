@@ -39,7 +39,7 @@ jobs:
         run: |
           VERSION=${{ needs.update-version.outputs.version }}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Updating version to $VERSION"
+          echo "Dump version to $VERSION"
           sed -i "s/var version = \".*\"/var version = \"$VERSION\"/" cmd/server/main.go
 
       - name: Commit changes
