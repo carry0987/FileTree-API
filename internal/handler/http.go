@@ -12,6 +12,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func HTTPMessage(w http.ResponseWriter, r *http.Request, message string) {
+	utils.OutputMessage(w, utils.HTTPResponse, http.StatusOK, message)
+}
+
 func HTTPHandler(w http.ResponseWriter, r *http.Request) {
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 
