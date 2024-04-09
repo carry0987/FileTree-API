@@ -43,11 +43,8 @@ func main() {
 	// Default handler for the root path
 	r.Handle("/", http.HandlerFunc(handler.DefaultHandler))
 
-	// Handler for WebSocket connections
-	r.Handle("/ws", http.HandlerFunc(handler.WebSocketHandler))
-
 	// Add the signature verification middleware to our file tree handler function
-	r.Handle("/{signature}/enc/{encrypted}", security.SignatureVerificationMiddleware(http.HandlerFunc(handler.FileTreeHandler)))
+	r.Handle("/{signature}/enc/{encrypted}", security.SignatureVerificationMiddleware(http.HandlerFunc(handler.UnifiedHandler)))
 
 	// If FILETREE_PORT is set, use that as the port, otherwise use 8080
 	port := os.Getenv("FILETREE_PORT")
