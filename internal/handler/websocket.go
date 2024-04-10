@@ -13,6 +13,7 @@ import (
 type wrapChunkData struct {
 	Index       int    `json:"index"`
 	TotalChunks int    `json:"totalChunks"`
+	Progress    int    `json:"progress"`
 	Data        string `json:"data"`
 }
 
@@ -29,6 +30,7 @@ func wrapChunks(chunk []byte, index, totalChunks int) ([]byte, error) {
 	data := wrapChunkData{
 		Index:       index,
 		TotalChunks: totalChunks,
+		Progress:    (index + 1) * 100 / totalChunks,
 		Data:        base64.StdEncoding.EncodeToString(chunk),
 	}
 
