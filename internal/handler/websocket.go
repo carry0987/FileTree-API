@@ -105,7 +105,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chunkSize := 1024
+	chunkSize := 10240
 	if err = sendInChunks(conn, result, chunkSize); err != nil {
 		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket in chunks")
 		return
