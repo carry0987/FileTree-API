@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/base64"
 	"net/http"
 
 	"github.com/carry0987/FileTree-API/internal/utils"
@@ -9,12 +10,56 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+type wrapChunkData struct {
+	Index       int    `json:"index"`
+	TotalChunks int    `json:"totalChunks"`
+	Data        string `json:"data"`
+}
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+func wrapChunks(chunk []byte, index, totalChunks int) ([]byte, error) {
+	data := wrapChunkData{
+		Index:       index,
+		TotalChunks: totalChunks,
+		Data:        base64.StdEncoding.EncodeToString(chunk),
+	}
+
+	return json.Marshal(data)
+}
+
+func sendInChunks(conn *websocket.Conn, data []byte, chunkSize int) error {
+	totalChunks := len(data) / chunkSize
+	if len(data)%chunkSize != 0 {
+		totalChunks++
+	}
+
+	for i := 0; i < totalChunks; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if end > len(data) {
+			end = len(data)
+		}
+		chunk := data[start:end]
+
+		message, err := wrapChunks(chunk, i, totalChunks)
+		if err != nil {
+			return err
+		}
+
+		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func UpgradeToWebSocket(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
@@ -43,7 +88,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	// Get the file tree result
 	fileTreeResult, err := ProcessEncryptedPath(r)
 
 	if err != nil {
@@ -57,6 +102,12 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := json.Marshal(fileTreeResult)
 	if err != nil {
 		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Error encoding file tree result to JSON")
+		return
+	}
+
+	chunkSize := 1024
+	if err = sendInChunks(conn, result, chunkSize); err != nil {
+		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket in chunks")
 		return
 	}
 
