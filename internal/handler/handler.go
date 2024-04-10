@@ -14,8 +14,8 @@ import (
 
 // Error declaration for specific Error handling
 var (
-	ErrMissingEncryptedParam = errors.New("missing encrypted parameter")
-	ErrFailedToDecrypt       = errors.New("failed to decrypt the path")
+	ErrMissingEncryptedParam   = errors.New("missing encrypted parameter")
+	ErrFailedToDecrypt         = errors.New("failed to decrypt the path")
 	ErrErrorGeneratingFileTree = errors.New("error generating file tree")
 )
 

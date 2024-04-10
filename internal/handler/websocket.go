@@ -18,13 +18,13 @@ var upgrader = websocket.Upgrader{
 }
 
 func UpgradeToWebSocket(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
-    conn, err := upgrader.Upgrade(w, r, nil)
-    if err != nil {
-        utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
-        return nil, err
-    }
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
+		return nil, err
+	}
 
-    return conn, nil
+	return conn, nil
 }
 
 func WebSocketMessage(w http.ResponseWriter, r *http.Request, message string) {
