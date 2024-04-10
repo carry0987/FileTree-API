@@ -4,7 +4,14 @@ FileTree-API is a high-performance, scalable server application built with Go th
 ## Features
 - **Secure Encryption**: Uses AES encryption and signature verification to secure directory path.
 - **Easy Integration**: Built with the Go, allowing for straightforward integration into any Go application.
-- **Optimized Performance**: Uses goroutines and optimized file system traversal strategies to efficiently handle large-scale file operations.
+- **Optimized Performance**:
+    - **Concurrent File Traversal**: Utilizes Go's goroutines to traverse directories concurrently.
+    - **Efficient File System Operations**: Implements optimized file system traversal strategies for high-performance file operations.
+    - **Scalable Architecture**: Designed to handle large-scale file operations across multi-threaded environments.
+    - **Optimize JSON Marshalling**: Uses `jsoniter` for faster JSON marshalling.
+    - **Support WebSockets**: Supports WebSocket for real-time file system monitoring.
+- **Dockerized**: Packaged with Docker for easy deployment and integration into any infrastructure.
+
 
 ## Getting Started
 1. Build the Go application
