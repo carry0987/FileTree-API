@@ -16,6 +16,8 @@ import (
 var (
 	ErrMissingEncryptedParam   = errors.New("missing encrypted parameter")
 	ErrFailedToDecrypt         = errors.New("failed to decrypt the path")
+	ErrInvalidSignature        = errors.New("invalid signature")
+	ErrInvalidSignatureFormat  = errors.New("invalid signature format")
 	ErrErrorGeneratingFileTree = errors.New("error generating file tree")
 )
 

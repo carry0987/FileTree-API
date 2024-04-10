@@ -9,11 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/carry0987/FileTree-API/internal/utils"
-
-	"github.com/gorilla/mux"
 )
 
 // key and salt should be retrieved from environment variables or other configuration sources here.
@@ -101,32 +98,4 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	}
 
 	return b, nil
-}
-
-func SignatureVerificationMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get the signature and encrypted parameters from the route or query parameters
-		vars := mux.Vars(r)
-		signature := vars["signature"]
-		encrypted := vars["encrypted"]
-
-		// Reassemble the URL path for signature verification
-		encPath := fmt.Sprintf("/enc/%s", encrypted)
-
-		// Decode signature
-		_, err := utils.Base64UrlDecode(signature)
-		if err != nil {
-			utils.OutputMessage(w, utils.HTTPResponse, http.StatusBadRequest, "Invalid signature format")
-			return
-		}
-
-		// Verify the signature
-		if !VerifySignature(signature, encPath) {
-			utils.OutputMessage(w, utils.HTTPResponse, http.StatusForbidden, "Invalid signature")
-			return
-		}
-
-		// Continue processing the rest of the request
-		next.ServeHTTP(w, r)
-	})
 }
