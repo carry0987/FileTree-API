@@ -14,6 +14,7 @@ type wrapChunkData struct {
 	Index       int    `json:"index"`
 	TotalChunks int    `json:"totalChunks"`
 	Progress    int    `json:"progress"`
+	Complete	bool   `json:"complete"`
 	Data        string `json:"data"`
 }
 
@@ -31,6 +32,7 @@ func wrapChunks(chunk []byte, index, totalChunks int) ([]byte, error) {
 		Index:       index,
 		TotalChunks: totalChunks,
 		Progress:    (index + 1) * 100 / totalChunks,
+		Complete:    index == totalChunks-1,
 		Data:        base64.StdEncoding.EncodeToString(chunk),
 	}
 
@@ -110,11 +112,6 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	chunkSize := 10240
 	if err = sendInChunks(conn, result, chunkSize); err != nil {
 		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket in chunks")
-		return
-	}
-
-	if err = conn.WriteMessage(websocket.TextMessage, result); err != nil {
-		utils.OutputMessage(conn, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to send file tree result over WebSocket")
 		return
 	}
 }
