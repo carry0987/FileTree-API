@@ -50,7 +50,8 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		errorMsg := err.Error()
 		apiErrorResponse := api.NewErrorResponse(errorMsg)
 		w.WriteHeader(DetermineHTTPStatusCode(err))
-		conn.WriteJSON(apiErrorResponse)
+		errJSON, _ := json.Marshal(apiErrorResponse)
+		conn.WriteMessage(websocket.TextMessage, errJSON)
 		return
 	}
 
