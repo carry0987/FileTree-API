@@ -8,7 +8,6 @@ import (
 	"github.com/carry0987/FileTree-API/internal/security"
 	"github.com/carry0987/FileTree-API/internal/utils"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 )
 
 func SignatureVerificationMiddleware(next http.Handler) http.Handler {
@@ -24,7 +23,7 @@ func SignatureVerificationMiddleware(next http.Handler) http.Handler {
 		// Decode signature
 		_, err := utils.Base64UrlDecode(signature)
 		if err != nil {
-			if websocket.IsWebSocketUpgrade(r) {
+			if utils.IsWebSocket(r) {
 				handler.WebSocketMessage(w, r, handler.ErrInvalidSignatureFormat.Error())
 			} else {
 				utils.OutputMessage(w, utils.HTTPResponse, http.StatusBadRequest, handler.ErrInvalidSignatureFormat.Error())
@@ -34,7 +33,7 @@ func SignatureVerificationMiddleware(next http.Handler) http.Handler {
 
 		// Verify the signature
 		if !security.VerifySignature(signature, encPath) {
-			if websocket.IsWebSocketUpgrade(r) {
+			if utils.IsWebSocket(r) {
 				handler.WebSocketMessage(w, r, handler.ErrInvalidSignature.Error())
 			} else {
 				utils.OutputMessage(w, utils.HTTPResponse, http.StatusForbidden, handler.ErrInvalidSignature.Error())

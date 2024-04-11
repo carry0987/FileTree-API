@@ -97,3 +97,8 @@ func CheckOrganize(data string) (string, bool) {
 
 	return s[0], false
 }
+
+// Check if the request is WebSocket
+func IsWebSocket(r *http.Request) bool {
+	return websocket.IsWebSocketUpgrade(r)
+}

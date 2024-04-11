@@ -9,7 +9,6 @@ import (
 	"github.com/carry0987/FileTree-API/internal/utils"
 	"github.com/carry0987/FileTree-API/pkg/api"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 )
 
 // Error declaration for specific Error handling
@@ -23,7 +22,7 @@ var (
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	message := "FileTree API"
-	if websocket.IsWebSocketUpgrade(r) {
+	if utils.IsWebSocket(r) {
 		WebSocketMessage(w, r, message)
 	} else {
 		HTTPMessage(w, r, message)
@@ -31,7 +30,7 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UnifiedHandler(w http.ResponseWriter, r *http.Request) {
-	if websocket.IsWebSocketUpgrade(r) {
+	if utils.IsWebSocket(r) {
 		WebSocketHandler(w, r)
 	} else {
 		HTTPHandler(w, r)

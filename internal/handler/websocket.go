@@ -69,7 +69,7 @@ func sendInChunks(conn *websocket.Conn, data []byte, chunkSize int) error {
 func UpgradeToWebSocket(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		utils.OutputMessage(w, utils.WebSocketResponse, http.StatusInternalServerError, "Failed to upgrade to WebSocket")
+		utils.OutputMessage(nil, utils.LogOutput, 0, "Failed to upgrade to WebSocket: %v", err)
 		return nil, err
 	}
 
