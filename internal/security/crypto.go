@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/carry0987/FileTree-API/internal/utils"
@@ -57,11 +56,11 @@ func Decrypt(encryptedMessage string) (string, error) {
 }
 
 // Compare the HMAC created from the message and salt with the one provided by the client
-func VerifySignatures(signature, encryptedPath string) bool {
+func VerifySignature(signature, encryptedPath string) bool {
 	// Decode the signature to get the HMAC
-	signatureDecoded, err := utils.Base64UrlDecode(signature)
+	decodedSignature, err := utils.Base64UrlDecode(signature)
 	if err != nil {
-		utils.OutputMessage(nil, utils.LogOutput, 0, "Invalid: %v", signature)
+		utils.OutputMessage(nil, utils.LogOutput, 0, "Invalid signature: %v\n", signature)
 		return false
 	}
 
@@ -72,21 +71,6 @@ func VerifySignatures(signature, encryptedPath string) bool {
 	expectedMAC := mac.Sum(nil)
 
 	// Compare the client's HMAC with the expected HMAC
-	return hmac.Equal(signatureDecoded, expectedMAC)
-}
-
-func VerifySignature(signature, encryptedPath string) bool {
-	decodedSignature, err := utils.Base64UrlDecode(signature)
-	if err != nil {
-		fmt.Printf("Invalid signature decode error: %v\n", err)
-		return false
-	}
-
-	mac := hmac.New(sha256.New, key)
-	mac.Write(salt)
-	mac.Write([]byte(encryptedPath))
-	expectedMAC := mac.Sum(nil)
-
 	return hmac.Equal(decodedSignature, expectedMAC)
 }
 
