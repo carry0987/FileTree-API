@@ -14,7 +14,7 @@ type wrapChunkData struct {
 	Index       int    `json:"index"`
 	TotalChunks int    `json:"totalChunks"`
 	Progress    int    `json:"progress"`
-	Complete	bool   `json:"complete"`
+	Complete    bool   `json:"complete"`
 	Data        string `json:"data"`
 }
 
