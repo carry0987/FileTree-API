@@ -12,7 +12,6 @@ FileTree-API is a high-performance, scalable server application built with Go th
     - **Support WebSockets**: Supports WebSocket for real-time file system monitoring.
 - **Dockerized**: Packaged with Docker for easy deployment and integration into any infrastructure.
 
-
 ## Getting Started
 1. Build the Go application
 ```bash
