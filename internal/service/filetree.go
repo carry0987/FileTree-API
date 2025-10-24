@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/carry0987/FileTree-API/internal/utils"
+	"FileTree-API/internal/utils"
 )
 
 type FileNode struct {

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/carry0987/FileTree-API/internal/utils"
+	"FileTree-API/internal/utils"
 )
 
 // GzipResponseWriter is a custom http.ResponseWriter that compresses responses with GZip.

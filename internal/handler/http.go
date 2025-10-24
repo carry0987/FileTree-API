@@ -3,8 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/carry0987/FileTree-API/internal/utils"
-	"github.com/carry0987/FileTree-API/pkg/api"
+	"FileTree-API/internal/utils"
+	"FileTree-API/pkg/api"
+
 	jsoniter "github.com/json-iterator/go"
 )
 

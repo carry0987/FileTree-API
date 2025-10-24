@@ -9,7 +9,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/carry0987/FileTree-API/internal/utils"
+	"FileTree-API/internal/utils"
 )
 
 // key and salt should be retrieved from environment variables or other configuration sources here.

@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/carry0987/FileTree-API/internal/handler"
-	"github.com/carry0987/FileTree-API/internal/middleware"
-	"github.com/carry0987/FileTree-API/internal/security"
-	"github.com/carry0987/FileTree-API/internal/utils"
+	"FileTree-API/internal/handler"
+	"FileTree-API/internal/middleware"
+	"FileTree-API/internal/security"
+	"FileTree-API/internal/utils"
 
 	"github.com/gorilla/mux"
 )

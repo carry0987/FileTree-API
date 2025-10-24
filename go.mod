@@ -1,4 +1,4 @@
-module github.com/carry0987/FileTree-API
+module FileTree-API
 
 go 1.23.0
 
