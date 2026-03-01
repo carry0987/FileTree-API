@@ -1,5 +1,9 @@
-# Ignore all local configuration files
-*.env
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
 
 # Ignore version control system directory
 .git
