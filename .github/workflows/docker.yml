@@ -98,8 +98,8 @@ jobs:
             latest
           annotations: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.description=Standalone media processing service for real-time image transformation and async video processing
-            org.opencontainers.image.licenses=Apache-2.0
+            org.opencontainers.image.description=A Go-based, Dockerized API for fast and efficient directory traversal and file listing, ideal for large-scale file systems.
+            org.opencontainers.image.licenses=MIT
             org.opencontainers.image.version=${{ steps.meta.outputs.version-number }}
             org.opencontainers.image.revision=${{ github.sha }}
 
