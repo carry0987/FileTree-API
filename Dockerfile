@@ -1,6 +1,9 @@
 # Use an official Golang runtime as a parent image
 FROM golang:1.24 AS builder
 
+ARG VERSION=dev
+ARG COMMIT=unknown
+
 # Set the working directory
 WORKDIR /app
 
@@ -14,7 +17,9 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o filetree cmd/server/main.go
+RUN CGO_ENABLED=1 go build \
+    -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
+    -o ./filetree ./cmd/server/main.go
 
 # Use a minimal alpine image
 FROM alpine:latest
